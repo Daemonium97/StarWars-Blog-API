@@ -30,15 +30,25 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+@app.route('/users', methods=['GET'])
+def get_personajes():
+    personajes_query = Personajes.query.all() 
+    result = list(map(lambda x: x.serialize(), personajes_query)) #mapea y obtiene la data que viene en el array
+    return jsonify(result), 200
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+   
 
 
     return jsonify(response_body), 200
+
+    @app.route('/user', methods=['POST'])
+    def create_user():
+        request_body = json.loads(request.data)
+        return 'recibido'
+
+
+
+
     
 
 # this only runs if `$ python src/main.py` is executed
