@@ -30,7 +30,7 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/users', methods=['GET'])
+@app.route('/personajes', methods=['GET'])
 def get_personajes():
     personajes_query = Personajes.query.all() 
     result = list(map(lambda x: x.serialize(), personajes_query)) #mapea y obtiene la data que viene en el array
@@ -41,10 +41,13 @@ def get_personajes():
 
     return jsonify(response_body), 200
 
-    @app.route('/user', methods=['POST'])
-    def create_user():
-        request_body = json.loads(request.data)
-        return 'recibido'
+    @app.route('/personajes', methods=['POST'])
+    def create_pers():
+     request_body = json.loads(request.data) #Peticion de los datos
+     if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and ["skin_color"] == None:
+         return "Datos incompletos"
+     else:
+         
 
 
 
