@@ -37,7 +37,7 @@ class Favorites(db.Model):
         }
 
 
-class Personajes(db.Model):
+class People(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
@@ -55,7 +55,7 @@ class Personajes(db.Model):
             "skin_color": self.skin_color
         }
 
-class Planetas(db.Model):
+class Planets(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
@@ -65,7 +65,7 @@ class Planetas(db.Model):
 
     def serialize(self):
         return{
-            "id": self.id,
+        "id": self.id,
         "name": self.name,
         "weather": self.weather,
         "diameter": self.diameter,
