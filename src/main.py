@@ -35,24 +35,33 @@ def get_user():
     user_query = User.query.all() 
     result = list(map(lambda x: x.serialize(), user_query)) #mapea y obtiene la data que viene en el array
     return jsonify(result), 200
+@app.route('/user/<int:id>', methods=['GET'])
+def get_user_by_id(id):
+    user = User.query.filter_by(id=id).first_or_404()
+    return jsonify(user.serialize()), 200
 
    
 
-@app.route('/user', methods=['POST'])
-def create_user():
-    request_body = json.loads(request.data) #Peticion de los datos
-    if request_body["name"] == None and request_body["email"] == None and request_body["password"] == None:
-        return "Datos incompletos"
-    else:
-        user = User(name="name"), User(email="email"), User(password="password") 
+# @app.route('/user', methods=['POST'])
+# def create_user():
+#     request_body = json.loads(request.data) #Peticion de los datos
+#     if request_body["name"] == None and request_body["email"] == None and request_body["password"] == None:
+#         return "Datos incompletos"
+#     else:
+#         user = User(name="name"), User(email="email"), User(password="password") 
 
-        return request_body, 200
+#         return request_body, 200
 
 @app.route('/people', methods=['GET'])
 def get_people():
     people_query = People.query.all()
     result = list(map(lambda x: x.serialize(), people_query)) #mapea el array de people
     return jsonify(result), 200
+
+@app.route('/people/<int:id>', methods=['GET'])
+def get_people_by_id(id):
+    people = People.query.filter_by(id=id).first_or_404()
+    return jsonify(people.serialize()), 200
 
 # @app.route('/people', methods=['POST'])
 # def create_people():
@@ -70,6 +79,10 @@ def get_favorites():
     favs_query = Favorites.query.all()
     result = list(map(lambda x: x.serialize(), favs_query))
     return jsonify(result), 200
+@app.route('/favorites/<int:id>', methods=['GET'])
+def get_fav_by_id(id):
+    fav = Favorites.query.filter_by(id=id).first_or_404()
+    return jsonify(fav.serialize()), 200
 
 # @app.route('/favorites', methods=['POST'])
 # def create_favs():
@@ -86,11 +99,17 @@ def get_planets():
     result = list(map(lambda x: x.serialize(), planets_query))
     return jsonify(result), 200
 
+@app.route('/planets/<int:id>', methods=['GET'])
+def get_planet_by_id(id):
+    planet = Planets.query.filter_by(id=id).first_or_404()
+    return jsonify(planet.serialize()), 200
 
 
 
 
-      
+
+
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
