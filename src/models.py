@@ -25,14 +25,14 @@ class Favorites(db.Model):
     # Notice that each db.Column is also a normal Python instance attribute.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    type = db.Column(db.Boolean)
+    
     favorites_user = db.Column(db.Integer, db.ForeignKey(User.id))
 
     def serialize(self):
         return{
             "id": self.id,
             "name": self.name,
-            "type": self.type,
+            
             "favorites_user": self.favorites_user
         }
 

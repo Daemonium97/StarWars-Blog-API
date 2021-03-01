@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Favorites, People, Planets
 #from models import Person
 
 app = Flask(__name__)
@@ -46,16 +46,53 @@ def create_user():
     else:
         user = User(name="name"), User(email="email"), User(password="password") 
 
-        return "Success"
+        return request_body, 200
+
+@app.route('/people', methods=['GET'])
+def get_people():
+    people_query = People.query.all()
+    result = list(map(lambda x: x.serialize(), people_query)) #mapea el array de people
+    return jsonify(result), 200
+
+@app.route('/people', methods=['POST'])
+def create_people():
+    request_body = json.loads(request.data) #Peticion de los datos
+    if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
+        return "Datos incompletos"
+    else:
+        people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
+        return request_body, 200
 
 
 
-         
+
+
+@app.route('/favorites', methods=['GET'])
+def get_favorites():
+    favs = Favorites.query.all()
+    result = list(map(lambda x: x.serialize(), favs))
+    return jsonify(favs), 200
+
+@app.route('/favorites', methods=['POST'])
+def create_favs():
+    request_body = json.loads(request.data)
+    if request_body["name"] == None and request_body["favorites_user"] == None:
+        return "Datos incompletos"
+    else:
+        fav = Favorites(name="name"), Favorites(favorites_user="favorites_user")
+        return request_body, 200
+
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    planets = Planets.query.all()
+    result = list(map(lambda x: x.serialize(), planets))
+    return jsonify(planets), 200
 
 
 
 
-    
+
+      
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
