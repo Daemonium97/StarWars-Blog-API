@@ -43,7 +43,7 @@ class People(db.Model):
     name = db.Column(db.String(250), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     hair_color = db.Column(db.String(250))
-    birthday = db.Column(db.Integer)
+    birthday = db.Column(db.String(250))
     skin_color = db.Column(db.String(250))
     img = db.Column(db.String(250))
 
