@@ -51,7 +51,7 @@ class People(db.Model):
         return{
             "id": self.id,
             "name": self.name,
-            "age": self.name,
+            "age": self.age,
             "hair_color": self.hair_color,
             "birthday": self.birthday,
             "skin_color": self.skin_color,
