@@ -45,14 +45,17 @@ class People(db.Model):
     hair_color = db.Column(db.String(250))
     birthday = db.Column(db.Integer)
     skin_color = db.Column(db.String(250))
+    img = db.Column(db.String(250))
 
     def serialize(self):
         return{
             "id": self.id,
             "name": self.name,
+            "age": self.name,
             "hair_color": self.hair_color,
             "birthday": self.birthday,
-            "skin_color": self.skin_color
+            "skin_color": self.skin_color,
+            "img": self.img
         }
 
 class Planets(db.Model):
@@ -62,6 +65,7 @@ class Planets(db.Model):
     weather = db.Column(db.String(250))
     diameter = db.Column(db.Integer)
     orbital = db.Column(db.Integer)
+    img = db.Column(db.String(250))
 
     def serialize(self):
         return{
@@ -69,6 +73,7 @@ class Planets(db.Model):
         "name": self.name,
         "weather": self.weather,
         "diameter": self.diameter,
-        "orbital": self.orbital 
+        "orbital": self.orbital,
+        "img": self.img 
         }
        
