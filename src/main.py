@@ -76,7 +76,7 @@ def create_people():
     if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
         return "Datos incompletos"
     else:
-        people = People(name=request_body["name"], hair_color=request_body["hair_color"], birthday=request_body["birthday"], skin_color=request_body["skin_color"])
+        people = People(name=request_body["name"], age=request_body["age"], hair_color=request_body["hair_color"], birthday=request_body["birthday"], skin_color=request_body["skin_color"], img=request_body["img"])
         db.session.add(people)
         db.session.commit()
 
@@ -116,6 +116,19 @@ def get_planet_by_id(id):
     planet = Planets.query.filter_by(id=id).first_or_404()
     return jsonify(planet.serialize()), 200
 
+
+@app.route('/planets', methods=['POST'])
+def create_planet():
+    request_body = json.loads(request.data) #Peticion de los datos
+    if request_body["name"] == None and request_body["weather"] == None and request_body["diameter"] == None and request_body["orbital"] and request_body["img"] == None:
+        return "Datos incompletos"
+    else:
+        planet = Planets(name=request_body["name"], weather=request_body["weather"], diameter=request_body["diameter"], orbital=request_body["orbital"], img=request_body["img"])
+        db.session.add(planet)
+        db.session.commit()
+
+
+        return "Successfully Created"
 
 
 
