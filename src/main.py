@@ -50,9 +50,12 @@ def create_user():
     if request_body["email"] == None and request_body["password"] == None:
         return "Datos incompletos"
     else:
-        user = User(email="email"), User(password="password") 
+        user = User(email="email", password="password") 
+        db.session.add(user)
+        db.session.commit()
 
-        return request_body, 200
+        return "Created Successfully"
+       
 
 # People CRUD-------------------------------------
 
