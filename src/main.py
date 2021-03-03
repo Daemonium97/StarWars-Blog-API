@@ -55,6 +55,22 @@ def create_user():
         db.session.commit()
 
         return "Successfully Created"
+
+
+@app.route('/update_user/<int:id>', methods=['PUT'])
+def update_user(id):
+    user = User.query.get(id)
+    if user is None:
+        raise APIException('User not found', status_code=404)
+
+    request_body = request.get_json()
+
+    if "email" in request_body:
+        user.email = request_body["email"]
+
+    db.session.commit()
+
+    return jsonify("Upgrated"), 200
        
 
 # People CRUD-------------------------------------
