@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, json
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -30,6 +30,8 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+#USER CRUD--------------------------------------------
+
 @app.route('/user', methods=['GET'])
 def get_user():
     user_query = User.query.all() 
@@ -42,15 +44,17 @@ def get_user_by_id(id):
 
    
 
-# @app.route('/user', methods=['POST'])
-# def create_user():
-#     request_body = json.loads(request.data) #Peticion de los datos
-#     if request_body["name"] == None and request_body["email"] == None and request_body["password"] == None:
-#         return "Datos incompletos"
-#     else:
-#         user = User(name="name"), User(email="email"), User(password="password") 
+@app.route('/user', methods=['POST'])
+def create_user():
+    request_body = json.loads(request.data) #Peticion de los datos
+    if request_body["email"] == None and request_body["password"] == None:
+        return "Datos incompletos"
+    else:
+        user = User(email="email"), User(password="password") 
 
-#         return request_body, 200
+        return request_body, 200
+
+# People CRUD-------------------------------------
 
 @app.route('/people', methods=['GET'])
 def get_people():
@@ -63,16 +67,16 @@ def get_people_by_id(id):
     people = People.query.filter_by(id=id).first_or_404()
     return jsonify(people.serialize()), 200
 
-# @app.route('/people', methods=['POST'])
-# def create_people():
-#     request_body = json.loads(request.data) #Peticion de los datos
-#     if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
-#         return "Datos incompletos"
-#     else:
-#         people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
-#         return request_body, 200
+@app.route('/people', methods=['POST'])
+def create_people():
+    request_body = json.loads(request.data) #Peticion de los datos
+    if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
+        return "Datos incompletos"
+    else:
+        people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
+        return request_body, 200
 
-
+#FAVORITES CRUD-------------------------------------------
 
 @app.route('/favorites', methods=['GET'])
 def get_favorites():
@@ -93,6 +97,7 @@ def get_fav_by_id(id):
 #         fav = Favorites(name="name"), Favorites(favorites_user="favorites_user")
 #         return request_body, 200
 
+#PLANETS CRUD------------------------------------------------
 @app.route('/planets', methods=['GET'])
 def get_planets():
     planets_query = Planets.query.all()
