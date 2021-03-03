@@ -54,7 +54,7 @@ def create_user():
         db.session.add(user)
         db.session.commit()
 
-        return "Created Successfully"
+        return "Successfully Created"
        
 
 # People CRUD-------------------------------------
@@ -77,6 +77,7 @@ def create_people():
         return "Datos incompletos"
     else:
         people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
+
 
         return request_body, 200
 
