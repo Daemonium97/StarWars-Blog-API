@@ -44,7 +44,7 @@ def get_user_by_id(id):
 
    
 
-@app.route('/user', methods=['POST'])
+@app.route('/user', methods=['POST']) #crea usuarios en la base de datos
 def create_user():
     request_body = json.loads(request.data) #Peticion de los datos
     if request_body["email"] == None and request_body["password"] == None:
@@ -77,6 +77,7 @@ def create_people():
         return "Datos incompletos"
     else:
         people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
+
         return request_body, 200
 
 #FAVORITES CRUD-------------------------------------------
