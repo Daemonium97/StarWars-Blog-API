@@ -50,7 +50,7 @@ def create_user():
     if request_body["email"] == None and request_body["password"] == None:
         return "Datos incompletos"
     else:
-        user = User(email="email", password="password") 
+        user = User(email=request_body["email"], password=request_body["password"]) 
         db.session.add(user)
         db.session.commit()
 
@@ -76,10 +76,12 @@ def create_people():
     if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
         return "Datos incompletos"
     else:
-        people = People(name="name"), People(hair_color="hair_color"), People(birthday="birthday"), People(skin_color="skin_color")
+        people = People(name=request_body["name"], hair_color=request_body["hair_color"], birthday=request_body["birthday"], skin_color=request_body["skin_color"])
+        db.session.add(people)
+        db.session.commit()
 
 
-        return request_body, 200
+        return "Successfully Created"
 
 #FAVORITES CRUD-------------------------------------------
 
