@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for, json
+from flask import Flask, request, jsonify, url_for, json, redirect, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -52,8 +52,7 @@ def create_user():
     else:
         user = User(email=request_body["email"], password=request_body["password"]) 
         db.session.add(user)
-        db.session.commit()
-
+        db.session.commit()      
         return "Successfully Created"
 
 
@@ -71,6 +70,8 @@ def update_user(id):
     db.session.commit()
 
     return jsonify("Upgrated"), 200
+
+
        
 
 # People CRUD-------------------------------------
