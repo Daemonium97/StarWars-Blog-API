@@ -2,15 +2,22 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for, json, redirect, url_for
+from flask import Flask, request, jsonify, url_for, json
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Favorites, People, Planets
-#from models import Person
+import datetime
 
+## Nos permite hacer las encripciones de contraseñas
+from werkzeug.security import generate_password_hash, check_password_hash
+
+## Nos permite manejar tokens por authentication (usuarios) 
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity # se instala con pipenv install Flask-JWT-Extended
+
+# SETUP del app
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
@@ -19,6 +26,7 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -30,122 +38,139 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-#USER CRUD--------------------------------------------
-
 @app.route('/user', methods=['GET'])
-def get_user():
-    user_query = User.query.all() 
-    result = list(map(lambda x: x.serialize(), user_query)) #mapea y obtiene la data que viene en el array
-    return jsonify(result), 200
-@app.route('/user/<int:id>', methods=['GET'])
-def get_user_by_id(id):
-    user = User.query.filter_by(id=id).first_or_404()
-    return jsonify(user.serialize()), 200
+def handle_hello():
+    response = User.query.all()
+    users = list(map(lambda x: x.serialize(), response))
 
-   
-
-@app.route('/user', methods=['POST']) #crea usuarios en la base de datos
-def create_user():
-    request_body = json.loads(request.data) #Peticion de los datos
-    if request_body["email"] == None and request_body["password"] == None:
-        return "Datos incompletos"
-    else:
-        user = User(email=request_body["email"], password=request_body["password"]) 
-        db.session.add(user)
-        db.session.commit()      
-        return "Successfully Created"
+    return jsonify(users), 200
 
 
-@app.route('/update_user/<int:id>', methods=['PUT'])
-def update_user(id):
-    user = User.query.get(id)
-    if user is None:
-        raise APIException('User not found', status_code=404)
+@app.route('/get_favorites', methods=['GET'])
+def get_fav():
+
+    # get all the favorites
+    query = Favorites.query.all()
+
+    # map the results and your list of people  inside of the all_people variable
+    results = list(map(lambda x: x.serialize(), query))
+
+    return jsonify(results), 200
+
+
+@app.route('/add_favorite', methods=['POST'])
+def add_fav():
+
+    # recibir info del request
+    request_body = request.get_json()
+    print(request_body)
+
+    fav = Favorites(name=request_body["name"], uid=request_body['uid'])
+    db.session.add(fav)
+    db.session.commit()
+
+    return jsonify("All good"), 200
+
+
+@app.route('/update_favorite/<int:fid>', methods=['PUT'])
+def update_fav(fid):
+
+    # recibir info del request
+    
+    fav = Favorites.query.get(fid)
+    if fav is None:
+        raise APIException('Favorite not found', status_code=404)
 
     request_body = request.get_json()
 
-    if "email" in request_body:
-        user.email = request_body["email"]
+    if "name" in request_body:
+        fav.name = request_body["name"]
 
     db.session.commit()
 
-    return jsonify("Upgrated"), 200
+    return jsonify("All good"), 200
 
 
-       
+@app.route('/del_favorite/<int:fid>', methods=['DELETE'])
+def del_fav(fid):
 
-# People CRUD-------------------------------------
+    # recibir info del request
+    
+    fav = Favorites.query.get(fid)
+    if fav is None:
+        raise APIException('Favorite not found', status_code=404)
 
-@app.route('/people', methods=['GET'])
-def get_people():
-    people_query = People.query.all()
-    result = list(map(lambda x: x.serialize(), people_query)) #mapea el array de people
-    return jsonify(result), 200
+    db.session.delete(fav)
 
-@app.route('/people/<int:id>', methods=['GET'])
-def get_people_by_id(id):
-    people = People.query.filter_by(id=id).first_or_404()
-    return jsonify(people.serialize()), 200
+    db.session.commit()
 
-@app.route('/people', methods=['POST'])
-def create_people():
-    request_body = json.loads(request.data) #Peticion de los datos
-    if request_body["name"] == None and request_body["hair_color"] == None and request_body["birthday"] == None and request_body["skin_color"]:
-        return "Datos incompletos"
-    else:
-        people = People(name=request_body["name"], age=request_body["age"], hair_color=request_body["hair_color"], birthday=request_body["birthday"], skin_color=request_body["skin_color"], img=request_body["img"])
-        db.session.add(people)
+    return jsonify("All good"), 200
+
+@app.route('/register', methods=["POST"])
+def register():
+    if request.method == 'POST':
+        email = request.json.get("email", None)
+        password = request.json.get("password", None)
+
+        if not email:
+            return jsonify({"msg": "email is required"}), 400
+        if not password:
+            return jsonify({"msg": "Password is required"}), 400
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            return jsonify({"msg": "Username  already exists"}), 400
+
+        user = User()
+        user.email = email
+        hashed_password = generate_password_hash(password)
+        print(password, hashed_password)
+
+        user.password = hashed_password
+
+        db.session.add(user)
         db.session.commit()
 
-
-        return "Successfully Created"
-
-#FAVORITES CRUD-------------------------------------------
-
-@app.route('/favorites', methods=['GET'])
-def get_favorites():
-    favs_query = Favorites.query.all()
-    result = list(map(lambda x: x.serialize(), favs_query))
-    return jsonify(result), 200
-@app.route('/favorites/<int:id>', methods=['GET'])
-def get_fav_by_id(id):
-    fav = Favorites.query.filter_by(id=id).first_or_404()
-    return jsonify(fav.serialize()), 200
-
-# @app.route('/favorites', methods=['POST'])
-# def create_favs():
-#     request_body = json.loads(request.data)
-#     if request_body["name"] == None and request_body["favorites_user"] == None:
-#         return "Datos incompletos"
-#     else:
-#         fav = Favorites(name="name"), Favorites(favorites_user="favorites_user")
-#         return request_body, 200
-
-#PLANETS CRUD------------------------------------------------
-@app.route('/planets', methods=['GET'])
-def get_planets():
-    planets_query = Planets.query.all()
-    result = list(map(lambda x: x.serialize(), planets_query))
-    return jsonify(result), 200
-
-@app.route('/planets/<int:id>', methods=['GET'])
-def get_planet_by_id(id):
-    planet = Planets.query.filter_by(id=id).first_or_404()
-    return jsonify(planet.serialize()), 200
+        return jsonify({"success": "Thanks. your register was successfully", "status": "true"}), 200
 
 
-@app.route('/planets', methods=['POST'])
-def create_planet():
-    request_body = json.loads(request.data) #Peticion de los datos
-    if request_body["name"] == None and request_body["weather"] == None and request_body["diameter"] == None and request_body["orbital"] and request_body["img"] == None:
-        return "Datos incompletos"
-    else:
-        planet = Planets(name=request_body["name"], weather=request_body["weather"], diameter=request_body["diameter"], orbital=request_body["orbital"], img=request_body["img"])
-        db.session.add(planet)
-        db.session.commit()
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        email = request.json.get("email", None)
+        password = request.json.get("password", None)
 
+        if not email:
+            return jsonify({"msg": "Username is required"}), 400
+        if not password:
+            return jsonify({"msg": "Password is required"}), 400
 
-        return "Successfully Created"
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"msg": "Username/Password are incorrect"}), 401
+
+        if not check_password_hash(user.password, password):
+            return jsonify({"msg": "Username/Password are incorrect"}), 401
+
+        # crear el token
+        expiracion = datetime.timedelta(days=3)
+        access_token = create_access_token(identity=user.email, expires_delta=expiracion)
+
+        data = {
+            "user": user.serialize(),
+            "token": access_token,
+            "expires": expiracion.total_seconds()*1000
+        }
+
+        return jsonify(data), 200
+
+@app.route('/profile', methods=['GET'])
+@jwt_required()
+def profile():
+    if request.method == 'GET':
+        token = get_jwt_identity()
+        return jsonify({"success": "Acceso a espacio privado", "usuario": token}), 200
+
 
 
 
