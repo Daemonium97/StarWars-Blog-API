@@ -171,6 +171,17 @@ def profile():
         token = get_jwt_identity()
         return jsonify({"success": "Acceso a espacio privado", "usuario": token}), 200
 
+#PEOPLE CRUD----------------
+
+@app.route('/people', methods=['GET'])
+def get_people():
+    response = People.query.all()
+    people = list(map(lambda x: x.serialize(), response))
+    return jsonify(people), 200
+
+
+
+
 
 
 
